@@ -1,7 +1,6 @@
 import sqlite3
 import os
 import re
-import spacy
 
 current_file = os.path.abspath(os.path.dirname(__file__))
 connection = sqlite3.connect('conversation.db')
@@ -12,7 +11,6 @@ c.execute(""" CREATE TABLE IF NOT EXISTS conversation (
 
 texts = {}
 p = re.compile('L\d{1,}')
-nlp = spacy.load('en')
 
 inputs = []
 outputs = []
