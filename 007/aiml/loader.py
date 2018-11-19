@@ -12,6 +12,7 @@ import random
 # Load the spacy model: nlp
 nlp = spacy.load('en_core_web_lg')
 current_file = os.path.abspath(os.path.dirname(__file__))
+engine = pyttsx3.init()
 
 files = glob.glob(current_file + '/*.aiml')
 # questions = []
@@ -35,10 +36,13 @@ def answer(message):
             qList.add(k)
     _q = random.choice(list(qList))
     _a = kernel.respond(questions[_q])
+    print(_a)
+    engine.say(_a)
+    engine.runAndWait()
     return _a
 
 
-for f in files[:2]:
+for f in files:
     tree = ET.parse(f)
     root = tree.getroot()
     for cat in root.findall('category'):
@@ -53,4 +57,4 @@ kernel.learn(current_file + "/startup.xml")
 kernel.respond("load aiml")
 
 while True:
-    print(answer(input("> ")))
+    answer(input("> "))
