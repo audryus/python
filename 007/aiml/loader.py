@@ -20,8 +20,35 @@ files = glob.glob(current_file + '/*.aiml')
 questions = {}
 
 
+def should_comment(message):
+    if is_question(message):
+        return True
+    if ('hi' in message or 'hello' in message or 'hey' in message):
+        return True
+    return random.random() > 0.5
+
+
+def is_question(message):
+    is_question = False
+    if (message.startswith('are ')
+        or message.startswith('am I ')
+        or message.startswith("ain't ")
+        or message.startswith('is ')
+        or message.startswith('what ')
+            or message.startswith('who ')
+        or message.startswith('whom ')
+        or message.startswith('when ')
+            or message.startswith('where ')
+            or '?' in message):
+        is_question = True
+    return is_question
+
+
 def answer(message):
+    if not should_comment(message):
+        return ""
     start = timeit.default_timer()
+    message = message.lower()
     resp = nlp(message)
     _a = "Sorry. I don't understand."
     result = 0
@@ -36,9 +63,6 @@ def answer(message):
             qList.add(k)
     _q = random.choice(list(qList))
     _a = kernel.respond(questions[_q])
-    print(_a)
-    engine.say(_a)
-    engine.runAndWait()
     return _a
 
 
@@ -47,7 +71,10 @@ for f in files:
     root = tree.getroot()
     for cat in root.findall('category'):
         _p = cat.find('pattern').text
-        questions[_p] = nlp(_p)
+        if _p is None:
+            print(f)
+        elif len(_p.strip()) > 0 and _p is not "*":
+            questions[_p] = nlp(_p)
 
 
 kernel = aiml.Kernel()
@@ -57,4 +84,8 @@ kernel.learn(current_file + "/startup.xml")
 kernel.respond("load aiml")
 
 while True:
-    answer(input("> "))
+    _i = input("> ")
+    _a = answer(_i)
+    print(_a)
+    engine.say(_a)
+    engine.runAndWait()
